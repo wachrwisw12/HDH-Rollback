@@ -167,7 +167,7 @@ func (j *Provider) Login(username, password string) (*domain.User, error) {
         WHERE username = ?
     `, username).Scan(&stored)
 	if err != nil {
-		return nil, errors.New("user not found2")
+		return nil, errors.New("user not found")
 	}
 
 	if stored != password {
