@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@mui/x-data-grid": "^8.27.3",
+    "xlsx": "^0.18.5"
+  }
+}
