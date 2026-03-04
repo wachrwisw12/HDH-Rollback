@@ -6,6 +6,9 @@
       "icon": "build/windows/icon.ico"
     }
   },
+  "nsis": {
+    "icon": "build/windows/icon.ico"
+  },
   "outputfilename": "hdh-rollback",
   "frontend:install": "npm install",
   "frontend:build": "npm run build",
@@ -15,7 +18,7 @@
     "name": "wachrwisw12",
     "email": "wachrwisw12@gmail.com"
   },
-  "info":{
-    "productVersion":"1.0.0"
+  "info": {
+    "productVersion": "1.0.1"
   }
 }
