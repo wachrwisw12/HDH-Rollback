@@ -9,5 +9,8 @@
   "author": {
     "name": "wachrwisw12",
     "email": "wachrwisw12@gmail.com"
+  },
+  "info":{
+    "productVersion":"1.0.0"
   }
 }

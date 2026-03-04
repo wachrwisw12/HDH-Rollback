@@ -11,12 +11,15 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
 	"hdh-rollback/internal/config"
 	"hdh-rollback/internal/db"
 	"hdh-rollback/internal/his"
 	"hdh-rollback/internal/his/domain"
+	"hdh-rollback/internal/updater"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"github.com/xuri/excelize/v2"
@@ -136,6 +139,21 @@ func (a *App) Login(username, password string) (*domain.User, string) {
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+	go func() {
+		time.Sleep(2 * time.Second)
+		currentVersion := "1.0.0"
+		latest, url, err := updater.Check(currentVersion)
+		if err != nil || latest == "" {
+			return
+		}
+
+		tempPath := filepath.Join(os.TempDir(), "update.exe")
+		err = updater.Download(url, tempPath)
+		if err != nil {
+			return
+		}
+		updater.Install(tempPath)
+	}()
 }
 
 func (a *App) BulkGetCID(list []domain.CIDRequest) (map[string]domain.PersonResult, error) {
