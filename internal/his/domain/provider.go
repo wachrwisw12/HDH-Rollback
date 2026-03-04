@@ -10,7 +10,7 @@ type CIDRequest struct {
 	Pid string `json:"pid"`
 }
 type PersonResult struct {
-	CID         string `json:"cid"`
+	CID         string `json:"his_cid"`
 	FullName    string `json:"fullname"`
 	Hn          string `json:"hn,omitempty"`
 	AddressName string `json:"address_name"`

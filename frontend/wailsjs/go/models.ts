@@ -53,6 +53,22 @@ export namespace domain {
 	        this.rows = source["rows"];
 	    }
 	}
+	export class User {
+	    ID: number;
+	    Username: string;
+	    FullName: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new User(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ID = source["ID"];
+	        this.Username = source["Username"];
+	        this.FullName = source["FullName"];
+	    }
+	}
 
 }
 

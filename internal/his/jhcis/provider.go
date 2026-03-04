@@ -3,7 +3,6 @@ package jhcis
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -39,13 +38,13 @@ func (h *Provider) BulkGetCID(list []domain.CIDRequest) (map[string]domain.Perso
 	// STEP 1: ค้นหาด้วย person_id
 	// =========================
 	query1 := `
-		SELECT pt.hn,
-		       ps.person_id,
-		       ps.cid,
-		       CONCAT(ps.pname, ps.fname, ' ', ps.lname) AS full_name
+		SELECT 
+		       ps.pid,
+		       ps.idcard,
+		       CONCAT(pcc.prename, ps.fname, ' ', ps.lname) AS full_name
 		FROM person ps
-		LEFT JOIN patient pt ON ps.cid = pt.cid
-		WHERE ps.person_id IN (` + strings.Join(placeholders, ",") + `)
+		INNER JOIN _tmpprename_code pcc ON pcc.prenamecode=ps.prename
+		WHERE ps.pid IN (` + strings.Join(placeholders, ",") + `)
 	`
 
 	rows, err := h.db.Query(query1, args...)
@@ -57,13 +56,13 @@ func (h *Provider) BulkGetCID(list []domain.CIDRequest) (map[string]domain.Perso
 	foundMap := make(map[string]bool)
 
 	for rows.Next() {
-		var hn sql.NullString
+		// var hn sql.NullString
 		var pidInt int
 		var cid sql.NullString
 		var fullName sql.NullString
 
 		// ✅ ลำดับต้องตรงกับ SELECT
-		if err := rows.Scan(&hn, &pidInt, &cid, &fullName); err != nil {
+		if err := rows.Scan(&pidInt, &cid, &fullName); err != nil {
 			return nil, err
 		}
 
@@ -72,7 +71,7 @@ func (h *Provider) BulkGetCID(list []domain.CIDRequest) (map[string]domain.Perso
 		person := domain.PersonResult{
 			CID:      cid.String,
 			FullName: fullName.String,
-			Hn:       hn.String,
+			// Hn:       hn.String,
 		}
 
 		results[pidStr] = person
@@ -104,15 +103,13 @@ func (h *Provider) BulkGetCID(list []domain.CIDRequest) (map[string]domain.Perso
 	}
 
 	query2 := `
-		SELECT pt.hn,
-		       ps.person_id,
-		       ps.cid,
-		       CONCAT(ps.pname, ps.fname, ' ', ps.lname) AS full_name,
-			   CONCAT(pt.addrpart,' หมู่ ',pt.moopart,' ',td.full_name) AS address_name
+		SELECT 
+		       ps.pid,
+		       ps.idcard,
+		       CONCAT(pcc.prename, ps.fname, ' ', ps.lname) AS full_name
 		FROM person ps
-		LEFT JOIN patient pt ON ps.cid = pt.cid
-		LEFT JOIN thaiaddress td ON td.addressid=pt.addressid
-		WHERE ps.cid IN (` + strings.Join(placeholders2, ",") + `)
+		INNER JOIN _tmpprename_code pcc ON pcc.prenamecode=ps.prename
+		WHERE ps.idcard IN (` + strings.Join(placeholders2, ",") + `)
 	`
 
 	rows2, err := h.db.Query(query2, missing...)
@@ -122,21 +119,21 @@ func (h *Provider) BulkGetCID(list []domain.CIDRequest) (map[string]domain.Perso
 	defer rows2.Close()
 
 	for rows2.Next() {
-		var hn sql.NullString
+		// var hn sql.NullString
 		var pidInt int
 		var cid sql.NullString
 		var fullName sql.NullString
-		var addressName sql.NullString
+		// var addressName sql.NullString
 
-		if err := rows2.Scan(&hn, &pidInt, &cid, &fullName, &addressName); err != nil {
+		if err := rows2.Scan(&pidInt, &cid, &fullName); err != nil {
 			return nil, err
 		}
 
 		person := domain.PersonResult{
-			CID:         cid.String,
-			FullName:    fullName.String,
-			Hn:          hn.String,
-			AddressName: addressName.String,
+			CID:      cid.String,
+			FullName: fullName.String,
+			// Hn:          hn.String,
+			// AddressName: addressName.String,
 		}
 
 		// key ด้วย cid (fallback)
@@ -157,7 +154,6 @@ func New(db *sql.DB) *Provider {
 }
 
 func (j *Provider) Login(username, password string) (*domain.User, error) {
-	fmt.Print(username)
 	var stored string
 	var fullName string
 
@@ -167,7 +163,7 @@ func (j *Provider) Login(username, password string) (*domain.User, error) {
         WHERE username = ?
     `, username).Scan(&stored)
 	if err != nil {
-		return nil, errors.New("user not found")
+		return nil, errors.New("user not found jhcis")
 	}
 
 	if stored != password {

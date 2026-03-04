@@ -5,13 +5,21 @@ import UploadFileIcon from "@mui/icons-material/UploadFile";
 import ExcelConvertPage from "../pages/ExcelProcessPage";
 import { GetVersion } from "../../wailsjs/go/main/App";
 import Dashboard from "../pages/Dashboard";
-export default function MainLayout() {
+import AboutPage from "../pages/AboutPage";
+import type { User } from "../type/user.type";
+import { Info } from "@mui/icons-material";
+type Props = {
+  user: User;
+  onLogout: () => void;
+};
+
+export default function MainLayout({ user, onLogout }: Props) {
   const [selected, setSelected] = useState("dashboard");
   const pages = [
     { key: "dashboard", label: "หน้าหลัก", icon: <HomeIcon /> },
     // { key: "reports", label: "Reports", icon: <BarChartIcon /> },
-    { key: "excel", label: "Excheang", icon: <UploadFileIcon /> },
-    // { key: "settings", label: "Settings", icon: <SettingsIcon /> },
+    { key: "excel", label: "ค้นหาข้อมูล", icon: <UploadFileIcon /> },
+    { key: "about", label: "เกี่ยวกับโปรแกรม", icon: <Info /> },
   ];
 
   const renderContent = () => {
@@ -20,8 +28,8 @@ export default function MainLayout() {
         return <Dashboard />;
       case "excel":
         return <ExcelConvertPage />;
-      case "settings":
-        return <h2>Settings</h2>;
+      case "about":
+        return <AboutPage />;
       default:
         return <h2>Dashboard</h2>;
     }
@@ -29,6 +37,7 @@ export default function MainLayout() {
   useEffect(() => {
     const loadVersion = async () => {
       const version = await GetVersion();
+      console.log("version", version);
     };
 
     loadVersion();
@@ -57,7 +66,7 @@ export default function MainLayout() {
           </Typography>
 
           <Box sx={{ position: "absolute", left: 23, bottom: 8 }}>
-            <Typography variant="body2">Version :{version}</Typography>
+            <Typography variant="body2"></Typography>
           </Box>
           <Box
             sx={{
@@ -95,7 +104,9 @@ export default function MainLayout() {
             transform: "translateY(-50%)",
           }}
         >
-          <Typography variant="body1">ผู้ใช้งาน: admin</Typography>
+          <Typography variant="body1">
+            ผู้ใช้งาน:{user?.full_name || "JHCIS"}
+          </Typography>
         </Box>
       </AppBar>
 

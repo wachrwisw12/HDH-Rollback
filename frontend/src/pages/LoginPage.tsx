@@ -15,7 +15,7 @@ import { Login } from "../../wailsjs/go/main/App";
 // import { Login } from "../../wailsjs/go/main/App";
 
 type Props = {
-  onLoginSuccess: () => void;
+  onLoginSuccess: (user: any) => void;
   onOpenSetup: () => void;
 };
 
@@ -30,15 +30,10 @@ export default function LoginPage({ onLoginSuccess, onOpenSetup }: Props) {
     setLoading(true);
 
     try {
-      const result = await Login(username, password);
-
-      if (result === "ok") {
-        onLoginSuccess();
-      } else {
-        setError(result); // backend ส่ง error message กลับมา
-      }
-    } catch (err) {
-      setError("ไม่สามารถติดต่อระบบได้");
+      const user = await Login(username, password);
+      onLoginSuccess(user);
+    } catch (err: any) {
+      setError(err?.message || "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
     } finally {
       setLoading(false);
     }

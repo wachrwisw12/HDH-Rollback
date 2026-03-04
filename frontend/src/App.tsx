@@ -1,21 +1,30 @@
 import { useEffect, useState } from "react";
-import { HasConfig, CheckDatabaseConnection } from "../wailsjs/go/main/App";
+import {
+  HasConfig,
+  CheckDatabaseConnection,
+  HasVerifyLicense,
+} from "../wailsjs/go/main/App";
 
 import SetupPage from "./pages/SetupPage";
 import LoginPage from "./pages/LoginPage";
 import MainLayout from "./layout/MainLayout";
 
 import { Box, CircularProgress } from "@mui/material";
+import RegisterPage from "./pages/RegisterPage";
 
-type AppState = "loading" | "setup" | "login" | "main";
+type AppState = "loading" | "setup" | "login" | "main" | "verify" | "about";
 
 function App() {
   const [appState, setAppState] = useState<AppState>("loading");
-
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const init = async () => {
     try {
+      const hasVerify = await HasVerifyLicense();
       const hasConfig = await HasConfig();
-
+      if (!hasVerify) {
+        setAppState("verify");
+        return;
+      }
       if (!hasConfig) {
         setAppState("setup");
         return;
@@ -54,6 +63,8 @@ function App() {
             <CircularProgress />
           </Box>
         );
+      case "verify":
+        return <RegisterPage onSuccess={() => init()} />;
 
       case "setup":
         return (
@@ -66,13 +77,24 @@ function App() {
       case "login":
         return (
           <LoginPage
-            onLoginSuccess={() => setAppState("main")}
+            onLoginSuccess={(user) => {
+              setCurrentUser(user);
+              setAppState("main");
+            }}
             onOpenSetup={() => setAppState("setup")}
           />
         );
 
       case "main":
-        return <MainLayout />;
+        return (
+          <MainLayout
+            user={currentUser}
+            onLogout={() => {
+              setCurrentUser(null);
+              setAppState("login");
+            }}
+          />
+        );
 
       default:
         return null;

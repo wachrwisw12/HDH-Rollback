@@ -21,13 +21,13 @@ func New(db *sql.DB) *Provider {
 
 func (h *Provider) Login(username, password string) (*domain.User, error) {
 	var storedHash string
-	// var fullName string
+	var fullName string
 
 	err := h.db.QueryRow(`
-		SELECT passweb
+		SELECT passweb ,name
 		FROM opduser
 		WHERE loginname = ?
-	`, username).Scan(&storedHash)
+	`, username).Scan(&storedHash, &fullName)
 	if err != nil {
 		return nil, errors.New("user not found")
 	}
@@ -38,7 +38,7 @@ func (h *Provider) Login(username, password string) (*domain.User, error) {
 
 	return &domain.User{
 		Username: username,
-		// FullName: fullName,
+		FullName: fullName,
 	}, nil
 }
 

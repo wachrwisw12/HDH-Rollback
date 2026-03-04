@@ -7,6 +7,7 @@ import {
   Stack,
   LinearProgress,
   Alert,
+  Snackbar,
 } from "@mui/material";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import AutorenewIcon from "@mui/icons-material/Autorenew";
@@ -32,6 +33,7 @@ export default function ExcelConvertPage() {
   const [progress, setProgress] = useState(0);
   const [rows, setRows] = useState<any[]>([]);
   const [columns, setColumns] = useState<GridColDef[]>([]);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   useEffect(() => {
     const unsubscribe = EventsOn("cid-progress", (percent: number) => {
       setProgress(percent);
@@ -114,93 +116,84 @@ export default function ExcelConvertPage() {
     setProgress(0);
 
     try {
-      // เตรียม payload ส่งไป Go
       const payload = rows.map((row) => ({
         pid: row.pid?.toString().trim(),
       }));
-      console.log("Payload for Go:", payload);
+
       const resultMap = await BulkGetCID(payload);
 
-      // เติม newCid เข้าแต่ละแถว
       const updatedRows = rows.map((row) => {
         const key = parseInt(row.pid, 10).toString();
         const data = resultMap[key];
 
         return {
           ...row,
-          newCid: data?.cid || "",
-          fullname: data?.fullname || "",
-          hn: data?.hn || "",
-          address_name: data?.address_name || "",
+          ...data,
         };
       });
+
       setProgress(100);
-      // ตรวจว่ามี column newCid แล้วหรือยัง (กันซ้ำ)
-      const hasColumn = columns.some((c) => c.field === "newCid");
 
-      if (!hasColumn) {
-        const checkboxColumn: GridColDef = {
-          field: "done",
-          headerName: "สถานะ",
-          width: 100,
-          renderCell: (params) => (
-            <input
-              type="checkbox"
-              checked={params.row.done || false}
-              onChange={(e) => {
-                setRows((prevRows) =>
-                  prevRows.map((r) =>
-                    r.id === params.row.id
-                      ? { ...r, done: e.target.checked } // ✅ สำคัญมาก
-                      : r,
-                  ),
-                );
-              }}
-            />
-          ),
-        };
-        const newHColumn: GridColDef = {
-          field: "hn",
-          headerName: "HN",
-          width: 120,
-          headerClassName: "cid-header-modern",
-          cellClassName: (params) => "hn-modern",
-        };
+      const firstResult = Object.values(resultMap)[0] as any;
 
-        const newCidColumn: GridColDef = {
-          field: "newCid",
-          headerName: "CID",
-          width: 180,
-          headerClassName: "cid-header-modern",
-          cellClassName: (params) =>
-            !params.value ? "cid-missing-modern" : "cid-found-modern",
-        };
+      if (firstResult) {
+        const backendFields = Object.keys(firstResult);
 
-        const fullNameColumn: GridColDef = {
-          field: "fullname",
-          headerName: "ชื่อ-สกุล",
-          width: 220,
-          headerClassName: "cid-header-modern",
-          cellClassName: "fullname-modern",
-        };
-        const addressNameColumn: GridColDef = {
-          field: "address_name",
-          headerName: "ที่อยู่",
-          width: 220,
-          headerClassName: "cid-header-modern",
-          cellClassName: "fullname-modern",
-        };
-        setColumns((prev) => [
-          checkboxColumn,
-          newHColumn,
-          newCidColumn,
-          fullNameColumn,
-          addressNameColumn,
-          ...prev,
-        ]);
+        setColumns((prev) => {
+          const existingFields = prev.map((c) => c.field);
+
+          // 🔥 checkbox column (เพิ่มครั้งเดียว)
+          const checkboxColumn: GridColDef = {
+            field: "done",
+            headerName: "บันทึก",
+            width: 100,
+            sortable: false,
+            renderCell: (params) => (
+              <input
+                type="checkbox"
+                checked={params.row.done || false}
+                onChange={(e) => {
+                  setRows((prevRows) =>
+                    prevRows.map((r) =>
+                      r.id === params.row.id
+                        ? { ...r, done: e.target.checked }
+                        : r,
+                    ),
+                  );
+                }}
+              />
+            ),
+          };
+
+          const newColumns: GridColDef[] = backendFields
+            .filter((key) => !existingFields.includes(key))
+            .map((key) => ({
+              field: key,
+              headerName: key,
+              width: 180,
+              headerClassName: "backend-header",
+              cellClassName: "backend-cell",
+            }));
+
+          let finalColumns = [...prev];
+
+          // ✅ ถ้ายังไม่มี checkbox
+          if (!existingFields.includes("done")) {
+            finalColumns = [checkboxColumn, ...finalColumns];
+          }
+
+          // ✅ เพิ่ม backend fields ด้านหน้า
+          if (newColumns.length > 0) {
+            finalColumns = [...newColumns, ...finalColumns];
+          }
+
+          return finalColumns;
+        });
       }
+
       setRows(updatedRows);
       setSuccess(true);
+      setSnackbarOpen(true); // 🔥 เพิ่มบรรทัดนี้
     } catch (err) {
       console.error(err);
       alert("เกิดข้อผิดพลาดในการดึงข้อมูล");
@@ -230,13 +223,7 @@ export default function ExcelConvertPage() {
                 โหลดข้อมูลสำเร็จ ({rows.length} แถว)
               </Alert>
             )}
-            <Typography variant="subtitle1">การประมวลผล</Typography>
-            {processing && (
-              <>
-                <LinearProgress variant="determinate" value={progress} />
-                <Typography mt={1}>{progress}%</Typography>
-              </>
-            )}
+
             <Stack direction="row" spacing={2}>
               <Button
                 variant="contained"
@@ -251,18 +238,42 @@ export default function ExcelConvertPage() {
                 variant="outlined"
                 startIcon={<DownloadIcon />}
                 onClick={handleExport}
+                disabled={rows.length === 0 || processing || success === false}
               >
                 บันทึกไฟล์ใหม่
               </Button>
             </Stack>
-            {success && (
-              <Alert severity="success">
-                แปลงไฟล์สำเร็จ สามารถบันทึกไฟล์ได้
-              </Alert>
-            )}
 
-            <Button onClick={handleSaveStatus}>บันทึกสถานะ</Button>
+            <Button
+              onClick={handleSaveStatus}
+              disabled={rows.length === 0 || processing || success === false}
+            >
+              บันทึกสถานะ
+            </Button>
           </Stack>
+
+          {processing && (
+            <>
+              <Box sx={{ width: "100%", mt: 2 }}>
+                <Typography variant="subtitle2" gutterBottom>
+                  กำลังประมวลผล... {progress}%
+                </Typography>
+
+                <LinearProgress
+                  color="success"
+                  variant="determinate"
+                  value={progress}
+                  sx={{
+                    height: 8,
+                    borderRadius: 4,
+                    "& .MuiLinearProgress-bar": {
+                      transition: "none", // 🔥 ปิด animation
+                    },
+                  }}
+                />
+              </Box>
+            </>
+          )}
         </Stack>
       </Paper>
 
@@ -294,33 +305,39 @@ export default function ExcelConvertPage() {
                   backgroundColor: "rgba(251, 205, 220, 0.35)", // ชมพูโปร่ง
                   pointerEvents: "none",
                 },
-                "& .MuiDataGrid-cell[data-field='hn']": {
-                  backgroundColor: "#e8f5e9", // เขียวจาง
+
+                "& .row-selected": {
+                  backgroundColor: "#fce4ec",
+                },
+
+                "& .backend-cell": {
+                  backgroundColor: "#e8f5e9",
                   color: "#1b5e20",
                   fontWeight: 500,
                 },
-                "& .MuiDataGrid-cell[data-field='newCid']": {
-                  backgroundColor: "#e8f5e9", // เขียวจาง
-                  color: "#1b5e20",
-                  fontWeight: 500,
-                },
-                "& .MuiDataGrid-cell[data-field='fullname']": {
-                  backgroundColor: "#e8f5e9", // เขียวจางเหมือนกัน
-                  color: "#1b5e20",
-                  fontWeight: 500,
-                },
-                "& .MuiDataGrid-columnHeader[data-field='newCid']": {
-                  background: "linear-gradient(90deg, #66bb6a, #81c784)",
-                  color: "#fff",
-                  fontWeight: 600,
-                },
-                "& .MuiDataGrid-columnHeader[data-field='fullname']": {
+
+                "& .backend-header": {
                   background: "linear-gradient(90deg, #66bb6a, #81c784)",
                   color: "#fff",
                   fontWeight: 600,
                 },
               }}
             />
+            <Snackbar
+              open={snackbarOpen}
+              autoHideDuration={2000}
+              onClose={() => setSnackbarOpen(false)}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            >
+              <Alert
+                onClose={() => setSnackbarOpen(false)}
+                severity="success"
+                variant="filled"
+                sx={{ width: "100%" }}
+              >
+                สำเร็จ
+              </Alert>
+            </Snackbar>
           </Box>
         </Paper>
       )}

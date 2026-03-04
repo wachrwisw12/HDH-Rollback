@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -26,6 +29,7 @@ type App struct {
 	provider        domain.HISProvider
 	currentUser     *domain.User
 	currentFilePath string
+	appMode         string
 }
 
 func NewApp() *App {
@@ -39,6 +43,10 @@ func (a *App) GetVersion() string {
 
 func (a *App) HasConfig() bool {
 	return config.Exists()
+}
+
+func (a *App) HasVerifyLicense() bool {
+	return config.VerifyLicense()
 }
 
 func (a *App) CheckDatabaseConnection() bool {
@@ -84,6 +92,10 @@ func (a *App) TestConnection(cfg config.Config, password string) string {
 	return "ok"
 }
 
+func (a *App) GetHardware() string {
+	return config.GetHardwareID() // ฟังก์ชันที่คุณมีอยู่แล้ว
+}
+
 func (a *App) GetConfig() (*config.Config, error) {
 	return config.Load()
 }
@@ -106,20 +118,20 @@ func (a *App) SaveConfig(cfg config.Config) string {
 	return "ok"
 }
 
-func (a *App) Login(username, password string) string {
+func (a *App) Login(username, password string) (*domain.User, string) {
 	if a.provider == nil {
-		return "database not connected"
+		return nil, "database not connected"
 	}
 
 	user, err := a.provider.Login(username, password)
 	if err != nil {
-		return err.Error()
+		return nil, err.Error()
 	}
 
 	// ถ้าคุณยังมี currentUser ต้องใส่กลับเข้า struct
 	a.currentUser = user
 
-	return "ok"
+	return user, "ok"
 }
 
 func (a *App) startup(ctx context.Context) {
@@ -274,7 +286,7 @@ func (a *App) UpdateExcelStatus(data []map[string]interface{}) error {
 		if !ok {
 			done = false
 		}
-		fmt.Println("Row", i, "done:", done)
+		// fmt.Println("Row", i, "done:", done)
 		startCell := fmt.Sprintf("A%d", excelRow)
 		endCell := fmt.Sprintf("Z%d", excelRow)
 
@@ -307,4 +319,39 @@ func (a *App) CheckUpdate() (*UpdateInfo, error) {
 	}
 
 	return &info, nil
+}
+
+func (a *App) Activate(siteCode string) error {
+	hwid := config.GetHardwareID()
+
+	payload := map[string]string{
+		"hardware_id": hwid,
+		"site_code":   siteCode,
+	}
+
+	body, _ := json.Marshal(payload)
+
+	resp, err := http.Post(
+		"http://your-api/activate",
+		"application/json",
+		bytes.NewBuffer(body),
+	)
+	if err != nil {
+		return errors.New("cannot connect to server")
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return errors.New("activation failed")
+	}
+
+	licenseJSON, _ := io.ReadAll(resp.Body)
+
+	// save license
+	err = os.WriteFile("activation.dat", licenseJSON, 0o644)
+	if err != nil {
+		return errors.New("cannot save license")
+	}
+
+	return nil
 }

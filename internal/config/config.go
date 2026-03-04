@@ -21,7 +21,7 @@ func getAppDir() (string, error) {
 		return "", err
 	}
 
-	appDir := filepath.Join(base, "HDH-Exchange")
+	appDir := filepath.Join(base, "HDH-rollback")
 	err = os.MkdirAll(appDir, 0o755)
 	if err != nil {
 		return "", err

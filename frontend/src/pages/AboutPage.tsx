@@ -1,41 +1,94 @@
-import { useEffect, useState } from "react";
-import { GetVersion, CheckUpdate } from "../../wailsjs/go/main/App";
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Divider,
+  Stack,
+  Link,
+  Button,
+} from "@mui/material";
+import InfoIcon from "@mui/icons-material/Info";
+import EmailIcon from "@mui/icons-material/Email";
+import PhoneIcon from "@mui/icons-material/Phone";
+import LanguageIcon from "@mui/icons-material/Language";
 
-export default function About() {
-  const [version, setVersion] = useState("");
-  const [updateMsg, setUpdateMsg] = useState("");
-
-  useEffect(() => {
-    const loadVersion = async () => {
-      const v = await GetVersion();
-      setVersion(v);
-    };
-    loadVersion();
-  }, []);
-
-  const handleCheckUpdate = async () => {
-    try {
-      const updateInfo = await CheckUpdate();
-
-      if (updateInfo.version !== version) {
-        setUpdateMsg(`มีเวอร์ชันใหม่ ${updateInfo.version}`);
-        window.open(updateInfo.url);
-      } else {
-        setUpdateMsg("คุณใช้เวอร์ชันล่าสุดแล้ว");
-      }
-    } catch (err) {
-      setUpdateMsg("ตรวจสอบไม่สำเร็จ");
-    }
-  };
-
+function AboutPage() {
   return (
-    <div style={{ padding: 20 }}>
-      <h2>About</h2>
-      <p>Version: {version}</p>
+    <Box
+      sx={{
+        flex: 1,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        p: 3,
+        bgcolor: "#f5f5f5",
+      }}
+    >
+      <Card sx={{ width: 500, borderRadius: 3, boxShadow: 4 }}>
+        <CardContent>
+          <Stack spacing={2}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <InfoIcon color="primary" />
+              <Typography variant="h5" fontWeight="bold">
+                เกี่ยวกับโปรแกรม
+              </Typography>
+            </Box>
 
-      <button onClick={handleCheckUpdate}>Check Update</button>
+            <Divider />
 
-      <p>{updateMsg}</p>
-    </div>
+            <Typography variant="body1">
+              <strong>ชื่อโปรแกรม:</strong> HDH Rollback (HDC HIS Rollback)
+            </Typography>
+
+            <Typography variant="body1">
+              <strong>เวอร์ชัน:</strong> 1.0.0
+            </Typography>
+
+            <Typography variant="body1">
+              <strong>พัฒนาโดย:</strong> กลุ่มงานสุขภาพดิจิทัล (ICT)
+              สำนักงานสาธารณสุขจังหวัดสกลนคร
+            </Typography>
+
+            <Divider />
+
+            <Typography variant="h6" fontWeight="bold">
+              ติดต่อสอบถาม
+            </Typography>
+
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <PhoneIcon fontSize="small" />
+              <Typography variant="body2">02-123-4567</Typography>
+            </Stack>
+
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <EmailIcon fontSize="small" />
+              <Link href="mailto:support@abc.co.th" underline="hover">
+                support@abc.co.th
+              </Link>
+            </Stack>
+
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <LanguageIcon fontSize="small" />
+              <Link
+                href="https://skko.moph.go.th"
+                target="_blank"
+                underline="hover"
+              >
+                www.abc.co.th
+              </Link>
+            </Stack>
+
+            <Divider sx={{ my: 2 }} />
+
+            <Typography variant="caption" align="center" color="text.secondary">
+              © 2026 ABC Technology Co., Ltd. All rights reserved.
+            </Typography>
+          </Stack>
+        </CardContent>
+      </Card>
+    </Box>
   );
 }
+
+export default AboutPage;

@@ -4,6 +4,8 @@ import {domain} from '../models';
 import {main} from '../models';
 import {config} from '../models';
 
+export function Activate(arg1:string):Promise<void>;
+
 export function BulkGetCID(arg1:Array<domain.CIDRequest>):Promise<Record<string, domain.PersonResult>>;
 
 export function CheckDatabaseConnection():Promise<boolean>;
@@ -12,13 +14,17 @@ export function CheckUpdate():Promise<main.UpdateInfo>;
 
 export function GetConfig():Promise<config.Config>;
 
+export function GetHardware():Promise<string>;
+
 export function GetPassword():Promise<string>;
 
 export function GetVersion():Promise<string>;
 
 export function HasConfig():Promise<boolean>;
 
-export function Login(arg1:string,arg2:string):Promise<string>;
+export function HasVerifyLicense():Promise<boolean>;
+
+export function Login(arg1:string,arg2:string):Promise<domain.User|string>;
 
 export function OpenExcel():Promise<domain.ExcelResponse>;
 
