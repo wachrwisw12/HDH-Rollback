@@ -24,6 +24,9 @@
   },
 
   "info": {
-    "productVersion": "1.0.1"
-  }
+  "productVersion": "1.0.0",
+  "companyName": "skko sakonakon",
+  "productName": "HDH Rollback",
+  "fileDescription": "HDH Rollback System"
+}
 }

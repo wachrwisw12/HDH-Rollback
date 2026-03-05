@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, version } from "react";
 import {
   HasConfig,
   CheckDatabaseConnection,
-  HasVerifyLicense,
+  CheckUpdate,
+  GetVersion,
 } from "../wailsjs/go/main/App";
 
 import SetupPage from "./pages/SetupPage";
@@ -11,20 +12,25 @@ import MainLayout from "./layout/MainLayout";
 
 import { Box, CircularProgress } from "@mui/material";
 import RegisterPage from "./pages/RegisterPage";
+import UpdateDialog from "./components/UpdateDialog";
 
 type AppState = "loading" | "setup" | "login" | "main" | "verify" | "about";
 
 function App() {
   const [appState, setAppState] = useState<AppState>("loading");
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [updateInfo, setUpdateInfo] = useState<any>(null);
+
   const init = async () => {
     try {
-      const hasVerify = await HasVerifyLicense();
+      var version = await GetVersion();
+      // const hasVerify = await HasVerifyLicense();
       const hasConfig = await HasConfig();
-      if (!hasVerify) {
-        setAppState("verify");
-        return;
-      }
+
+      // if (!hasVerify) {
+      //   setAppState("verify");
+      //   return;
+      // }
       if (!hasConfig) {
         setAppState("setup");
         return;
@@ -80,6 +86,9 @@ function App() {
             onLoginSuccess={(user) => {
               setCurrentUser(user);
               setAppState("main");
+              setTimeout(() => {
+                CheckUpdate(version);
+              }, 500);
             }}
             onOpenSetup={() => setAppState("setup")}
           />
@@ -105,13 +114,21 @@ function App() {
     <Box
       sx={{
         width: "100%",
-        height: "100vh", // เต็มหน้าต่าง
+        height: "100vh",
         display: "flex",
         flexDirection: "column",
-        overflow: "hidden", // ❗ ห้าม scroll ทั้งระบบ
+        overflow: "hidden",
       }}
     >
       {renderContent()}
+
+      {updateInfo && (
+        <UpdateDialog
+          version={updateInfo.version}
+          url={updateInfo.url}
+          onClose={() => setUpdateInfo(null)}
+        />
+      )}
     </Box>
   );
 }

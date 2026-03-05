@@ -10,7 +10,7 @@ export function BulkGetCID(arg1:Array<domain.CIDRequest>):Promise<Record<string,
 
 export function CheckDatabaseConnection():Promise<boolean>;
 
-export function CheckUpdate():Promise<main.UpdateInfo>;
+export function CheckUpdate(arg1:string):Promise<main.UpdateInfo>;
 
 export function GetConfig():Promise<config.Config>;
 

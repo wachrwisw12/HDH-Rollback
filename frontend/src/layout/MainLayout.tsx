@@ -3,7 +3,7 @@ import { AppBar, Toolbar, Typography, Box, Button } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import ExcelConvertPage from "../pages/ExcelProcessPage";
-import { GetVersion } from "../../wailsjs/go/main/App";
+
 import Dashboard from "../pages/Dashboard";
 import AboutPage from "../pages/AboutPage";
 import type { User } from "../type/user.type";
@@ -34,14 +34,7 @@ export default function MainLayout({ user, onLogout }: Props) {
         return <h2>Dashboard</h2>;
     }
   };
-  useEffect(() => {
-    const loadVersion = async () => {
-      const version = await GetVersion();
-      console.log("version", version);
-    };
 
-    loadVersion();
-  }, []);
   return (
     <Box
       sx={{

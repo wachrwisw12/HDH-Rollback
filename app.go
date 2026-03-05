@@ -11,15 +11,12 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
-	"time"
 
 	"hdh-rollback/internal/config"
 	"hdh-rollback/internal/db"
 	"hdh-rollback/internal/his"
 	"hdh-rollback/internal/his/domain"
-	"hdh-rollback/internal/updater"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"github.com/xuri/excelize/v2"
@@ -40,8 +37,7 @@ func NewApp() *App {
 }
 
 func (a *App) GetVersion() string {
-	AppVersion := "1.0.0"
-	return AppVersion
+	return config.Version
 }
 
 func (a *App) HasConfig() bool {
@@ -139,21 +135,6 @@ func (a *App) Login(username, password string) (*domain.User, string) {
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	go func() {
-		time.Sleep(2 * time.Second)
-		currentVersion := "1.0.0"
-		latest, url, err := updater.Check(currentVersion)
-		if err != nil || latest == "" {
-			return
-		}
-
-		tempPath := filepath.Join(os.TempDir(), "update.exe")
-		err = updater.Download(url, tempPath)
-		if err != nil {
-			return
-		}
-		updater.Install(tempPath)
-	}()
 }
 
 func (a *App) BulkGetCID(list []domain.CIDRequest) (map[string]domain.PersonResult, error) {
@@ -323,22 +304,6 @@ type UpdateInfo struct {
 	URL     string `json:"url"`
 }
 
-func (a *App) CheckUpdate() (*UpdateInfo, error) {
-	resp, err := http.Get("https://raw.githubusercontent.com/youruser/yourrepo/main/version.json")
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var info UpdateInfo
-	err = json.NewDecoder(resp.Body).Decode(&info)
-	if err != nil {
-		return nil, err
-	}
-
-	return &info, nil
-}
-
 func (a *App) Activate(siteCode string) error {
 	hwid := config.GetHardwareID()
 
@@ -372,4 +337,49 @@ func (a *App) Activate(siteCode string) error {
 	}
 
 	return nil
+}
+
+type Release struct {
+	TagName string `json:"tag_name"`
+	Assets  []struct {
+		Name               string `json:"name"`
+		BrowserDownloadURL string `json:"browser_download_url"`
+	} `json:"assets"`
+}
+
+func (a *App) CheckUpdate(currentVersion string) (*UpdateInfo, error) {
+	url := "https://api.github.com/repos/wachrwisw12/HDH-Rollback/releases/latest"
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var release Release
+	err = json.NewDecoder(resp.Body).Decode(&release)
+	if err != nil {
+		return nil, err
+	}
+
+	latest := strings.TrimPrefix(release.TagName, "v")
+	current := strings.TrimPrefix(currentVersion, "v")
+
+	if latest == current {
+		return nil, nil
+	}
+
+	var downloadURL string
+
+	for _, asset := range release.Assets {
+		if strings.Contains(asset.Name, "mac") {
+			downloadURL = asset.BrowserDownloadURL
+			break
+		}
+	}
+
+	return &UpdateInfo{
+		Version: latest,
+		URL:     downloadURL,
+	}, nil
 }

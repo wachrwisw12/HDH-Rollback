@@ -14,8 +14,8 @@ export function CheckDatabaseConnection() {
   return window['go']['main']['App']['CheckDatabaseConnection']();
 }
 
-export function CheckUpdate() {
-  return window['go']['main']['App']['CheckUpdate']();
+export function CheckUpdate(arg1) {
+  return window['go']['main']['App']['CheckUpdate'](arg1);
 }
 
 export function GetConfig() {
