@@ -4,15 +4,21 @@ package main
 
 import "golang.org/x/sys/windows"
 
-func alreadyRunning() bool {
-	name, _ := windows.UTF16PtrFromString("HDH_ROLLBACK_MUTEX")
+var mutex windows.Handle
 
-	mutex, _ := windows.CreateMutex(nil, false, name)
+func alreadyRunning() bool {
+	name, _ := windows.UTF16PtrFromString("Global\\HDH_ROLLBACK_MUTEX")
+
+	m, err := windows.CreateMutex(nil, false, name)
+	if err != nil {
+		return false
+	}
+
+	mutex = m
 
 	lastErr := windows.GetLastError()
 
 	if lastErr == windows.ERROR_ALREADY_EXISTS {
-		windows.CloseHandle(mutex)
 		return true
 	}
 
