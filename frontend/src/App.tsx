@@ -1,4 +1,4 @@
-import { useEffect, useState, version } from "react";
+import { useEffect, useState } from "react";
 import {
   HasConfig,
   CheckDatabaseConnection,
@@ -20,10 +20,12 @@ function App() {
   const [appState, setAppState] = useState<AppState>("loading");
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [updateInfo, setUpdateInfo] = useState<any>(null);
-
+  const [AppversionState, setAppversion] = useState("");
   const init = async () => {
     try {
-      var version = await GetVersion();
+      var Appversion = await GetVersion();
+      setAppversion(Appversion);
+      console.log(Appversion);
       // const hasVerify = await HasVerifyLicense();
       const hasConfig = await HasConfig();
 
@@ -87,7 +89,7 @@ function App() {
               setCurrentUser(user);
               setAppState("main");
               setTimeout(() => {
-                CheckUpdate(version);
+                CheckUpdate(AppversionState);
               }, 500);
             }}
             onOpenSetup={() => setAppState("setup")}
@@ -97,6 +99,7 @@ function App() {
       case "main":
         return (
           <MainLayout
+            version={AppversionState}
             user={currentUser}
             onLogout={() => {
               setCurrentUser(null);

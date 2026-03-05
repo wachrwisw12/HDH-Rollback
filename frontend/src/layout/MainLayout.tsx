@@ -1,4 +1,4 @@
-import { useEffect, useState, version } from "react";
+import { useEffect, useState } from "react";
 import { AppBar, Toolbar, Typography, Box, Button } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
@@ -11,9 +11,10 @@ import { Info } from "@mui/icons-material";
 type Props = {
   user: User;
   onLogout: () => void;
+  version: string;
 };
 
-export default function MainLayout({ user, onLogout }: Props) {
+export default function MainLayout({ version, user, onLogout }: Props) {
   const [selected, setSelected] = useState("dashboard");
   const pages = [
     { key: "dashboard", label: "หน้าหลัก", icon: <HomeIcon /> },
@@ -54,10 +55,12 @@ export default function MainLayout({ user, onLogout }: Props) {
         }}
       >
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography variant="h6" noWrap>
-            HDH Rollback
-          </Typography>
-
+          <Box sx={{ display: "flex", flexDirection: "column" }}>
+            <Typography variant="h6" noWrap>
+              HDH Rollback
+            </Typography>
+            <Typography variant="caption">{version}</Typography>
+          </Box>
           <Box sx={{ position: "absolute", left: 23, bottom: 8 }}>
             <Typography variant="body2"></Typography>
           </Box>
