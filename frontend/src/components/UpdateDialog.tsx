@@ -16,7 +16,11 @@ export default function UpdateDialog({ version, url, onClose }: UpdateTag) {
     <Dialog open>
       <DialogTitle>มีเวอร์ชันใหม่</DialogTitle>
 
-      <DialogContent>พบเวอร์ชันใหม่ {version}</DialogContent>
+      <DialogContent>
+        พบเวอร์ชันใหม่ <b>{version}</b>
+        <br />
+        ต้องการดาวน์โหลดตอนนี้หรือไม่
+      </DialogContent>
 
       <DialogActions>
         <Button onClick={onClose}>ภายหลัง</Button>

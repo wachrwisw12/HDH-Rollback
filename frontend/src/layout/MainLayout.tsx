@@ -9,6 +9,7 @@ import AboutPage from "../pages/AboutPage";
 import type { User } from "../type/user.type";
 import { Info } from "@mui/icons-material";
 import { CheckUpdate } from "../../wailsjs/go/main/App";
+import UpdateDialog from "../components/UpdateDialog";
 type Props = {
   user: User;
   onLogout: () => void;
@@ -143,6 +144,13 @@ export default function MainLayout({ version, user, onLogout }: Props) {
         <Toolbar />
         {renderContent()}
       </Box>
+      {update && (
+        <UpdateDialog
+          version={update.version}
+          url={update.url}
+          onClose={() => setUpdate(null)}
+        />
+      )}
     </Box>
   );
 }
