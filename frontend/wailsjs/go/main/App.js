@@ -18,6 +18,10 @@ export function CheckUpdate(arg1) {
   return window['go']['main']['App']['CheckUpdate'](arg1);
 }
 
+export function DownloadUpdate(arg1) {
+  return window['go']['main']['App']['DownloadUpdate'](arg1);
+}
+
 export function GetConfig() {
   return window['go']['main']['App']['GetConfig']();
 }

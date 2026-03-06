@@ -6,12 +6,15 @@ import {
   Button,
 } from "@mui/material";
 
+import { DownloadUpdate } from "../../wailsjs/go/main/App";
+
 type UpdateTag = {
   version: string;
   url: string;
   onClose: () => void;
 };
-export default function UpdateDialog({ version, url, onClose }: UpdateTag) {
+
+export default function UpdateDialog({ version, url }: UpdateTag) {
   return (
     <Dialog open>
       <DialogTitle>มีเวอร์ชันใหม่</DialogTitle>
@@ -23,8 +26,7 @@ export default function UpdateDialog({ version, url, onClose }: UpdateTag) {
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose}>ภายหลัง</Button>
-        <Button variant="contained" onClick={() => window.open(url)}>
+        <Button variant="contained" onClick={() => DownloadUpdate(url)}>
           ดาวน์โหลด
         </Button>
       </DialogActions>

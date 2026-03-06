@@ -11,6 +11,8 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"hdh-rollback/internal/config"
@@ -382,4 +384,33 @@ func (a *App) CheckUpdate(currentVersion string) (*UpdateInfo, error) {
 		Version: latest,
 		URL:     downloadURL,
 	}, nil
+}
+
+func (a *App) DownloadUpdate(url string) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	filePath := filepath.Join(os.TempDir(), "update.exe")
+
+	out, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return err
+	}
+
+	// เปิด installer
+	exec.Command(filePath).Start()
+
+	// ปิดโปรแกรม
+	runtime.Quit(a.ctx)
+
+	return nil
 }

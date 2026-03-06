@@ -12,6 +12,8 @@ export function CheckDatabaseConnection():Promise<boolean>;
 
 export function CheckUpdate(arg1:string):Promise<main.UpdateInfo>;
 
+export function DownloadUpdate(arg1:string):Promise<void>;
+
 export function GetConfig():Promise<config.Config>;
 
 export function GetHardware():Promise<string>;
