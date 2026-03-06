@@ -387,15 +387,13 @@ func (a *App) CheckUpdate(currentVersion string) (*UpdateInfo, error) {
 }
 
 func (a *App) DownloadUpdate(url string) error {
-	client := &http.Client{}
-
-	resp, err := client.Get(url)
+	resp, err := http.Get(url)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	filePath := filepath.Join(os.Getenv("USERPROFILE"), "Downloads", "update.exe")
+	filePath := filepath.Join(os.TempDir(), "HDH-Rollback-Setup.exe")
 
 	out, err := os.Create(filePath)
 	if err != nil {
@@ -406,42 +404,29 @@ func (a *App) DownloadUpdate(url string) error {
 	size := resp.ContentLength
 	var downloaded int64
 
-	buffer := make([]byte, 32*1024)
+	buf := make([]byte, 32*1024)
 
 	for {
-		n, err := resp.Body.Read(buffer)
-
+		n, err := resp.Body.Read(buf)
 		if n > 0 {
-			out.Write(buffer[:n])
-
+			out.Write(buf[:n])
 			downloaded += int64(n)
 
-			if size > 0 {
-				percent := int(float64(downloaded) / float64(size) * 100)
+			percent := int(float64(downloaded) / float64(size) * 100)
 
-				runtime.EventsEmit(a.ctx, "download-progress", percent)
-			}
+			runtime.EventsEmit(a.ctx, "download-progress", percent)
 		}
 
 		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			return err
+			break
 		}
 	}
-
-	runtime.EventsEmit(a.ctx, "download-progress", 100)
-
-	exec.Command(filePath).Start()
-
-	runtime.Quit(a.ctx)
 
 	return nil
 }
 
 func (a *App) InstallUpdate() {
-	filePath := filepath.Join(os.TempDir(), "update.exe")
+	filePath := filepath.Join(os.TempDir(), "HDH-Rollback-Setup.exe")
 
 	exec.Command(filePath).Start()
 

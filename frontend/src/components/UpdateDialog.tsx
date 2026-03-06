@@ -70,7 +70,7 @@ export default function UpdateDialog({ version, url }: UpdateTag) {
       <DialogActions>
         {!downloading && !done && (
           <Button variant="contained" onClick={handleDownload}>
-            ดาวน์โหลด
+            ดาวน์โหลดและติดตั้ง
           </Button>
         )}
 
