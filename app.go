@@ -374,7 +374,7 @@ func (a *App) CheckUpdate(currentVersion string) (*UpdateInfo, error) {
 	var downloadURL string
 
 	for _, asset := range release.Assets {
-		if asset.Name == "HDH-Rollback-Setup.exe" {
+		if asset.Name == "hdh-rollback-amd64-installer.exe" {
 			downloadURL = asset.BrowserDownloadURL
 			break
 		}
@@ -393,7 +393,7 @@ func (a *App) DownloadUpdate(url string) error {
 	}
 	defer resp.Body.Close()
 
-	filePath := filepath.Join(os.TempDir(), "HDH-Rollback-Setup.exe")
+	filePath := filepath.Join(os.TempDir(), "hdh-rollback-amd64-installer.exe")
 
 	out, err := os.Create(filePath)
 	if err != nil {
