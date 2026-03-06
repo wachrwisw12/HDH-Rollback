@@ -374,7 +374,7 @@ func (a *App) CheckUpdate(currentVersion string) (*UpdateInfo, error) {
 	var downloadURL string
 
 	for _, asset := range release.Assets {
-		if strings.Contains(asset.Name, "mac") {
+		if strings.Contains(asset.Name, ".exe") {
 			downloadURL = asset.BrowserDownloadURL
 			break
 		}
@@ -418,9 +418,11 @@ func (a *App) DownloadUpdate(url string) error {
 
 			downloaded += int64(n)
 
-			percent := int(float64(downloaded) / float64(size) * 100)
+			if size > 0 { // 🔥 ต้องเช็คก่อน
+				percent := int(float64(downloaded) / float64(size) * 100)
 
-			runtime.EventsEmit(a.ctx, "download-progress", percent)
+				runtime.EventsEmit(a.ctx, "download-progress", percent)
+			}
 		}
 
 		if err != nil {
@@ -430,6 +432,9 @@ func (a *App) DownloadUpdate(url string) error {
 			return err
 		}
 	}
+
+	// 🔥 ปิดท้ายให้ 100%
+	runtime.EventsEmit(a.ctx, "download-progress", 100)
 
 	return nil
 }
