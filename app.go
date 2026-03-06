@@ -387,13 +387,15 @@ func (a *App) CheckUpdate(currentVersion string) (*UpdateInfo, error) {
 }
 
 func (a *App) DownloadUpdate(url string) error {
-	resp, err := http.Get(url)
+	client := &http.Client{}
+
+	resp, err := client.Get(url)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	filePath := filepath.Join(os.TempDir(), "update.exe")
+	filePath := filepath.Join(os.Getenv("USERPROFILE"), "Downloads", "update.exe")
 
 	out, err := os.Create(filePath)
 	if err != nil {
@@ -410,15 +412,11 @@ func (a *App) DownloadUpdate(url string) error {
 		n, err := resp.Body.Read(buffer)
 
 		if n > 0 {
-
-			_, writeErr := out.Write(buffer[:n])
-			if writeErr != nil {
-				return writeErr
-			}
+			out.Write(buffer[:n])
 
 			downloaded += int64(n)
 
-			if size > 0 { // 🔥 ต้องเช็คก่อน
+			if size > 0 {
 				percent := int(float64(downloaded) / float64(size) * 100)
 
 				runtime.EventsEmit(a.ctx, "download-progress", percent)
@@ -433,8 +431,11 @@ func (a *App) DownloadUpdate(url string) error {
 		}
 	}
 
-	// 🔥 ปิดท้ายให้ 100%
 	runtime.EventsEmit(a.ctx, "download-progress", 100)
+
+	exec.Command(filePath).Start()
+
+	runtime.Quit(a.ctx)
 
 	return nil
 }
