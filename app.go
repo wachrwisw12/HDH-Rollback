@@ -119,20 +119,22 @@ func (a *App) SaveConfig(cfg config.Config) string {
 	return "ok"
 }
 
-func (a *App) Login(username, password string) (*domain.User, string) {
+func (a *App) Login(username, password string) domain.LoginResponse {
 	if a.provider == nil {
-		return nil, "database not connected"
+		return domain.LoginResponse{Status: "database not connected"}
 	}
 
 	user, err := a.provider.Login(username, password)
 	if err != nil {
-		return nil, err.Error()
+		return domain.LoginResponse{Status: err.Error()}
 	}
 
-	// ถ้าคุณยังมี currentUser ต้องใส่กลับเข้า struct
 	a.currentUser = user
 
-	return user, "ok"
+	return domain.LoginResponse{
+		Status: "ok",
+		User:   user,
+	}
 }
 
 func (a *App) startup(ctx context.Context) {
@@ -301,11 +303,6 @@ func (a *App) UpdateExcelStatus(data []map[string]interface{}) error {
 	return f.Save()
 }
 
-type UpdateInfo struct {
-	Version string `json:"version"`
-	URL     string `json:"url"`
-}
-
 func (a *App) Activate(siteCode string) error {
 	hwid := config.GetHardwareID()
 
@@ -349,7 +346,7 @@ type Release struct {
 	} `json:"assets"`
 }
 
-func (a *App) CheckUpdate(currentVersion string) (*UpdateInfo, error) {
+func (a *App) CheckUpdate(currentVersion string) (*domain.UpdateInfo, error) {
 	url := "https://api.github.com/repos/ict-ssj-sakon/HDH-Rollback/releases/latest"
 
 	resp, err := http.Get(url)
@@ -380,7 +377,7 @@ func (a *App) CheckUpdate(currentVersion string) (*UpdateInfo, error) {
 		}
 	}
 
-	return &UpdateInfo{
+	return &domain.UpdateInfo{
 		Version: latest,
 		URL:     downloadURL,
 	}, nil

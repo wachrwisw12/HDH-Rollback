@@ -16,10 +16,6 @@ type PersonResult struct {
 	AddressName string `json:"address_name"`
 }
 
-// type AuthProvider interface {
-// 	Login(username, password string) (*User, error)
-// }
-
 type CIDProvider interface {
 	BulkGetCID(list []CIDRequest) (map[string]string, error)
 }
@@ -30,4 +26,14 @@ type HISProvider interface {
 type ExcelResponse struct {
 	Headers []string                 `json:"headers"`
 	Rows    []map[string]interface{} `json:"rows"`
+}
+
+type LoginResponse struct {
+	Status string `json:"status"`
+	User   *User  `json:"user"`
+}
+
+type UpdateInfo struct {
+	Version string `json:"version"`
+	URL     string `json:"url"`
 }

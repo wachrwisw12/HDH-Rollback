@@ -2,30 +2,26 @@ import { useEffect, useState } from "react";
 import {
   HasConfig,
   CheckDatabaseConnection,
-  CheckUpdate,
   GetVersion,
 } from "../wailsjs/go/main/App";
 
 import SetupPage from "./pages/SetupPage";
 import LoginPage from "./pages/LoginPage";
 import MainLayout from "./layout/MainLayout";
-
+import { domain } from "../wailsjs/go/models";
 import { Box, CircularProgress } from "@mui/material";
 import RegisterPage from "./pages/RegisterPage";
-import UpdateDialog from "./components/UpdateDialog";
 
 type AppState = "loading" | "setup" | "login" | "main" | "verify" | "about";
 
 function App() {
   const [appState, setAppState] = useState<AppState>("loading");
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [updateInfo, setUpdateInfo] = useState<any>(null);
+  const [user, setUser] = useState<domain.User | null>(null); // 👈 เพิ่มตัวนี้
   const [AppversionState, setAppversion] = useState("");
   const init = async () => {
     try {
       var Appversion = await GetVersion();
       setAppversion(Appversion);
-      console.log(Appversion);
       // const hasVerify = await HasVerifyLicense();
       const hasConfig = await HasConfig();
 
@@ -86,7 +82,7 @@ function App() {
         return (
           <LoginPage
             onLoginSuccess={(user) => {
-              setCurrentUser(user);
+              setUser(user);
               setAppState("main");
             }}
             onOpenSetup={() => setAppState("setup")}
@@ -94,12 +90,14 @@ function App() {
         );
 
       case "main":
+        if (!user) return null;
+
         return (
           <MainLayout
             version={AppversionState}
-            user={currentUser}
+            user={user}
             onLogout={() => {
-              setCurrentUser(null);
+              setUser(null);
               setAppState("login");
             }}
           />

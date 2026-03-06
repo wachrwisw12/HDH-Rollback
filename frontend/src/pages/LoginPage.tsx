@@ -10,12 +10,10 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Login } from "../../wailsjs/go/main/App";
-
-// สมมติคุณมี Login function จาก Go
-// import { Login } from "../../wailsjs/go/main/App";
+import type { domain } from "../../wailsjs/go/models";
 
 type Props = {
-  onLoginSuccess: (user: any) => void;
+  onLoginSuccess: (user: domain.User) => void;
   onOpenSetup: () => void;
 };
 
@@ -30,10 +28,15 @@ export default function LoginPage({ onLoginSuccess, onOpenSetup }: Props) {
     setLoading(true);
 
     try {
-      const user = await Login(username, password);
-      onLoginSuccess(user);
+      const res = await Login(username, password);
+
+      if (res.status === "ok" && res.user) {
+        onLoginSuccess(res.user);
+      } else {
+        setError(res.status);
+      }
     } catch (err: any) {
-      setError(err?.message || "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+      setError(err?.message || "เกิดข้อผิดพลาด");
     } finally {
       setLoading(false);
     }
@@ -47,13 +50,13 @@ export default function LoginPage({ onLoginSuccess, onOpenSetup }: Props) {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        overflow: "hidden", // 👈 ปิด scroll
+        overflow: "hidden",
       }}
     >
       <Paper elevation={4} sx={{ p: 5, width: 380 }}>
         <Stack spacing={3}>
           <Typography variant="h5" fontWeight={600} textAlign="center">
-            HDH Exchange System
+            HDH Rollback
           </Typography>
 
           <Typography variant="body2" textAlign="center" color="text.secondary">
@@ -86,6 +89,7 @@ export default function LoginPage({ onLoginSuccess, onOpenSetup }: Props) {
           >
             {loading ? <CircularProgress size={24} /> : "เข้าสู่ระบบ"}
           </Button>
+
           <Button variant="text" size="large" fullWidth onClick={onOpenSetup}>
             ตั้งค่าฐานข้อมูล (สำหรับผู้ดูแลระบบ)
           </Button>

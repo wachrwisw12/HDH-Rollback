@@ -3,15 +3,15 @@ import { AppBar, Toolbar, Typography, Box, Button } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import ExcelConvertPage from "../pages/ExcelProcessPage";
-
+import { GetVersion } from "../../wailsjs/go/main/App";
 import Dashboard from "../pages/Dashboard";
 import AboutPage from "../pages/AboutPage";
-import type { User } from "../type/user.type";
 import { Info } from "@mui/icons-material";
 import { CheckUpdate } from "../../wailsjs/go/main/App";
 import UpdateDialog from "../components/UpdateDialog";
+import type { domain } from "../../wailsjs/go/models";
 type Props = {
-  user: User;
+  user: domain.User;
   onLogout: () => void;
   version: string;
 };
@@ -32,20 +32,23 @@ export default function MainLayout({ version, user, onLogout }: Props) {
   ];
   useEffect(() => {
     async function checkUpdate() {
+      const ver = await GetVersion();
+
+      if (ver === "dev") return; // 👈 dev ไม่ต้อง check update
+
       try {
-        const result = await CheckUpdate(version);
+        const result = await CheckUpdate(ver);
 
         if (result) {
-          console.log("New version:", result);
           setUpdate(result);
         }
       } catch (err) {
-        console.error("Check update error:", err);
+        console.error(err);
       }
     }
 
     checkUpdate();
-  }, []); // 👈 รันครั้งเดียวตอนเข้า component
+  }, []);
 
   const renderContent = () => {
     switch (selected) {
@@ -125,7 +128,7 @@ export default function MainLayout({ version, user, onLogout }: Props) {
           }}
         >
           <Typography variant="body1">
-            ผู้ใช้งาน:{user?.full_name || "JHCIS"}
+            ผู้ใช้งาน:{user?.FullName || " "}
           </Typography>
         </Box>
       </AppBar>
