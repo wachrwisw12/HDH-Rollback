@@ -88,9 +88,6 @@ function App() {
             onLoginSuccess={(user) => {
               setCurrentUser(user);
               setAppState("main");
-              setTimeout(() => {
-                CheckUpdate(AppversionState);
-              }, 500);
             }}
             onOpenSetup={() => setAppState("setup")}
           />

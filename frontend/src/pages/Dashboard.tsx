@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { CheckUpdate } from "../../wailsjs/go/main/App";
 
 export default function Dashboard() {
   return (

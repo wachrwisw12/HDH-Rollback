@@ -8,6 +8,7 @@ import Dashboard from "../pages/Dashboard";
 import AboutPage from "../pages/AboutPage";
 import type { User } from "../type/user.type";
 import { Info } from "@mui/icons-material";
+import { CheckUpdate } from "../../wailsjs/go/main/App";
 type Props = {
   user: User;
   onLogout: () => void;
@@ -16,12 +17,34 @@ type Props = {
 
 export default function MainLayout({ version, user, onLogout }: Props) {
   const [selected, setSelected] = useState("dashboard");
+  type UpdateInfo = {
+    version: string;
+    url: string;
+  };
+  const [update, setUpdate] = useState<UpdateInfo | null>(null);
+
   const pages = [
     { key: "dashboard", label: "หน้าหลัก", icon: <HomeIcon /> },
     // { key: "reports", label: "Reports", icon: <BarChartIcon /> },
     { key: "excel", label: "ค้นหาข้อมูล", icon: <UploadFileIcon /> },
     { key: "about", label: "เกี่ยวกับโปรแกรม", icon: <Info /> },
   ];
+  useEffect(() => {
+    async function checkUpdate() {
+      try {
+        const result = await CheckUpdate(version);
+
+        if (result) {
+          console.log("New version:", result);
+          setUpdate(result);
+        }
+      } catch (err) {
+        console.error("Check update error:", err);
+      }
+    }
+
+    checkUpdate();
+  }, []); // 👈 รันครั้งเดียวตอนเข้า component
 
   const renderContent = () => {
     switch (selected) {

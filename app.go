@@ -348,7 +348,7 @@ type Release struct {
 }
 
 func (a *App) CheckUpdate(currentVersion string) (*UpdateInfo, error) {
-	url := "https://api.github.com/repos/wachrwisw12/HDH-Rollback/releases/latest"
+	url := "https://api.github.com/repos/skko-sakonakon/HDH-Rollback/releases/latest"
 
 	resp, err := http.Get(url)
 	if err != nil {
