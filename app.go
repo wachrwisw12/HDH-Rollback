@@ -374,7 +374,7 @@ func (a *App) CheckUpdate(currentVersion string) (*UpdateInfo, error) {
 	var downloadURL string
 
 	for _, asset := range release.Assets {
-		if strings.Contains(asset.Name, ".exe") {
+		if asset.Name == "HDH-Rollback-Setup.exe" {
 			downloadURL = asset.BrowserDownloadURL
 			break
 		}
@@ -412,9 +412,11 @@ func (a *App) DownloadUpdate(url string) error {
 			out.Write(buf[:n])
 			downloaded += int64(n)
 
-			percent := int(float64(downloaded) / float64(size) * 100)
+			if size > 0 {
+				percent := int(float64(downloaded) / float64(size) * 100)
+				runtime.EventsEmit(a.ctx, "download-progress", percent)
+			}
 
-			runtime.EventsEmit(a.ctx, "download-progress", percent)
 		}
 
 		if err != nil {
