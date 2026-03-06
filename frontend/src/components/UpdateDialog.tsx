@@ -23,23 +23,29 @@ export default function UpdateDialog({ version, url }: UpdateTag) {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    EventsOn("download-progress", (p: number) => {
+    const unsubscribe = EventsOn("download-progress", (p: number) => {
       setProgress(p);
 
-      if (p === 100) {
+      if (p >= 100) {
         setDone(true);
         setDownloading(false);
       }
     });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const handleDownload = async () => {
+    setProgress(0);
     setDownloading(true);
 
     try {
       await DownloadUpdate(url);
     } catch (err) {
       console.error(err);
+      setDownloading(false);
     }
   };
 
@@ -69,7 +75,11 @@ export default function UpdateDialog({ version, url }: UpdateTag) {
 
       <DialogActions>
         {!downloading && !done && (
-          <Button variant="contained" onClick={handleDownload}>
+          <Button
+            variant="contained"
+            disabled={downloading}
+            onClick={handleDownload}
+          >
             ดาวน์โหลดและติดตั้ง
           </Button>
         )}
