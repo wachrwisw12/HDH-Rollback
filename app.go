@@ -428,7 +428,7 @@ func (a *App) DownloadUpdate(url string) error {
 }
 
 func (a *App) InstallUpdate() {
-	filePath := filepath.Join(os.TempDir(), "HDH-Rollback-Setup.exe")
+	filePath := filepath.Join(os.TempDir(), "hdh-rollback-amd64-installer.exe")
 
 	exec.Command(filePath).Start()
 
