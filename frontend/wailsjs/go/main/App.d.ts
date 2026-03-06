@@ -26,6 +26,8 @@ export function HasConfig():Promise<boolean>;
 
 export function HasVerifyLicense():Promise<boolean>;
 
+export function InstallUpdate():Promise<void>;
+
 export function Login(arg1:string,arg2:string):Promise<domain.User|string>;
 
 export function OpenExcel():Promise<domain.ExcelResponse>;

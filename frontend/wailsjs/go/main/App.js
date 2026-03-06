@@ -46,6 +46,10 @@ export function HasVerifyLicense() {
   return window['go']['main']['App']['HasVerifyLicense']();
 }
 
+export function InstallUpdate() {
+  return window['go']['main']['App']['InstallUpdate']();
+}
+
 export function Login(arg1, arg2) {
   return window['go']['main']['App']['Login'](arg1, arg2);
 }

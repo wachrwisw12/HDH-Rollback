@@ -401,16 +401,43 @@ func (a *App) DownloadUpdate(url string) error {
 	}
 	defer out.Close()
 
-	_, err = io.Copy(out, resp.Body)
-	if err != nil {
-		return err
+	size := resp.ContentLength
+	var downloaded int64
+
+	buffer := make([]byte, 32*1024)
+
+	for {
+		n, err := resp.Body.Read(buffer)
+
+		if n > 0 {
+
+			_, writeErr := out.Write(buffer[:n])
+			if writeErr != nil {
+				return writeErr
+			}
+
+			downloaded += int64(n)
+
+			percent := int(float64(downloaded) / float64(size) * 100)
+
+			runtime.EventsEmit(a.ctx, "download-progress", percent)
+		}
+
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			return err
+		}
 	}
 
-	// เปิด installer
+	return nil
+}
+
+func (a *App) InstallUpdate() {
+	filePath := filepath.Join(os.TempDir(), "update.exe")
+
 	exec.Command(filePath).Start()
 
-	// ปิดโปรแกรม
 	runtime.Quit(a.ctx)
-
-	return nil
 }

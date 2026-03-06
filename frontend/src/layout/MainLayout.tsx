@@ -144,13 +144,7 @@ export default function MainLayout({ version, user, onLogout }: Props) {
         <Toolbar />
         {renderContent()}
       </Box>
-      {update && (
-        <UpdateDialog
-          version={update.version}
-          url={update.url}
-          onClose={() => setUpdate(null)}
-        />
-      )}
+      {update && <UpdateDialog version={update.version} url={update.url} />}
     </Box>
   );
 }

@@ -121,14 +121,6 @@ function App() {
       }}
     >
       {renderContent()}
-
-      {updateInfo && (
-        <UpdateDialog
-          version={updateInfo.version}
-          url={updateInfo.url}
-          onClose={() => setUpdateInfo(null)}
-        />
-      )}
     </Box>
   );
 }
