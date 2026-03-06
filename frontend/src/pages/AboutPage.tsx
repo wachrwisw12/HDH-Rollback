@@ -42,10 +42,6 @@ function AboutPage() {
             </Typography>
 
             <Typography variant="body1">
-              <strong>เวอร์ชัน:</strong> 1.0.0
-            </Typography>
-
-            <Typography variant="body1">
               <strong>พัฒนาโดย:</strong> กลุ่มงานสุขภาพดิจิทัล (ICT)
               สำนักงานสาธารณสุขจังหวัดสกลนคร
             </Typography>
@@ -57,25 +53,13 @@ function AboutPage() {
             </Typography>
 
             <Stack direction="row" alignItems="center" spacing={1}>
-              <PhoneIcon fontSize="small" />
-              <Typography variant="body2">02-123-4567</Typography>
-            </Stack>
-
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <EmailIcon fontSize="small" />
-              <Link href="mailto:support@abc.co.th" underline="hover">
-                support@abc.co.th
-              </Link>
-            </Stack>
-
-            <Stack direction="row" alignItems="center" spacing={1}>
               <LanguageIcon fontSize="small" />
               <Link
                 href="https://skko.moph.go.th"
                 target="_blank"
                 underline="hover"
               >
-                www.abc.co.th
+                https://skko.moph.go.th/
               </Link>
             </Stack>
 
