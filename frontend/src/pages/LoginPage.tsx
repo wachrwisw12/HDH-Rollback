@@ -56,7 +56,7 @@ export default function LoginPage({ onLoginSuccess, onOpenSetup }: Props) {
       <Paper elevation={4} sx={{ p: 5, width: 380 }}>
         <Stack spacing={3}>
           <Typography variant="h5" fontWeight={600} textAlign="center">
-            HDH Rollback
+            HDH Rollback2
           </Typography>
 
           <Typography variant="body2" textAlign="center" color="text.secondary">
