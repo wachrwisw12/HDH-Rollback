@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+
+	"github.com/zalando/go-keyring"
 )
 
 type Config struct {
@@ -67,35 +69,44 @@ func Load() (*Config, error) {
 	return &cfg, nil
 }
 
-func getPasswordPath() (string, error) {
-	dir, err := getAppDir()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(dir, "db.pass"), nil
+// func getPasswordPath() (string, error) {
+// 	dir, err := getAppDir()
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	return filepath.Join(dir, "db.pass"), nil
+// }
+
+// func LoadPassword() (string, error) {
+// 	path, err := getPasswordPath()
+// 	if err != nil {
+// 		return "", err
+// 	}
+
+// 	data, err := os.ReadFile(path)
+// 	if err != nil {
+// 		return "", err
+// 	}
+
+// 	return string(data), nil
+// }
+
+// func SavePassword(password string) error {
+// 	path, err := getPasswordPath()
+// 	if err != nil {
+// 		return err
+// 	}
+
+//		return os.WriteFile(path, []byte(password), 0o600)
+//	}
+const service = "hdh_app"
+
+func SavePassword(password string) error {
+	return keyring.Set(service, "db_password", password)
 }
 
 func LoadPassword() (string, error) {
-	path, err := getPasswordPath()
-	if err != nil {
-		return "", err
-	}
-
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return "", err
-	}
-
-	return string(data), nil
-}
-
-func SavePassword(password string) error {
-	path, err := getPasswordPath()
-	if err != nil {
-		return err
-	}
-
-	return os.WriteFile(path, []byte(password), 0o600)
+	return keyring.Get(service, "db_password")
 }
 
 func Save(cfg *Config) error {

@@ -22,13 +22,8 @@ function App() {
     try {
       var Appversion = await GetVersion();
       setAppversion(Appversion);
-      // const hasVerify = await HasVerifyLicense();
       const hasConfig = await HasConfig();
 
-      // if (!hasVerify) {
-      //   setAppState("verify");
-      //   return;
-      // }
       if (!hasConfig) {
         setAppState("setup");
         return;

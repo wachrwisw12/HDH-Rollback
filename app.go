@@ -83,7 +83,7 @@ func (a *App) CheckDatabaseConnection() bool {
 }
 
 func (a *App) TestConnection(cfg config.Config, password string) string {
-	fmt.Println("DBType received:", cfg.DBType)
+	// fmt.Println("DBType received:", cfg.DBType)
 
 	dbConn, err := db.Connect(&cfg, password)
 	if err != nil {
@@ -424,10 +424,17 @@ func (a *App) DownloadUpdate(url string) error {
 	return nil
 }
 
-func (a *App) InstallUpdate() {
+func (a *App) InstallUpdate() error {
 	filePath := filepath.Join(os.TempDir(), "hdh-rollback-amd64-installer.exe")
 
-	exec.Command(filePath).Start()
+	fmt.Println("Run installer:", filePath)
+
+	cmd := exec.Command("cmd", "/C", "start", "", filePath)
+	err := cmd.Start()
+	if err != nil {
+		return err
+	}
 
 	runtime.Quit(a.ctx)
+	return nil
 }
