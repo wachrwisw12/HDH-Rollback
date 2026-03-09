@@ -398,28 +398,14 @@ func (a *App) DownloadUpdate(url string) error {
 	}
 	defer out.Close()
 
-	size := resp.ContentLength
-	var downloaded int64
-
-	buf := make([]byte, 32*1024)
-
-	for {
-		n, err := resp.Body.Read(buf)
-		if n > 0 {
-			out.Write(buf[:n])
-			downloaded += int64(n)
-
-			if size > 0 {
-				percent := int(float64(downloaded) / float64(size) * 100)
-				runtime.EventsEmit(a.ctx, "download-progress", percent)
-			}
-
-		}
-
-		if err != nil {
-			break
-		}
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return err
 	}
+
+	out.Sync()
+
+	fmt.Println("Downloaded to:", filePath)
 
 	return nil
 }
@@ -433,7 +419,13 @@ func (a *App) InstallUpdate() error {
 
 	fmt.Println("Run installer:", filePath)
 
-	cmd := exec.Command(filePath)
+	cmd := exec.Command(
+		"powershell",
+		"Start-Process",
+		filePath,
+		"-Verb",
+		"runAs",
+	)
 
 	err := cmd.Start()
 	if err != nil {
@@ -441,6 +433,7 @@ func (a *App) InstallUpdate() error {
 	}
 
 	runtime.Quit(a.ctx)
+
 	return nil
 }
 
