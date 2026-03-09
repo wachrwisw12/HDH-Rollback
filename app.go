@@ -427,9 +427,14 @@ func (a *App) DownloadUpdate(url string) error {
 func (a *App) InstallUpdate() error {
 	filePath := filepath.Join(os.TempDir(), "hdh-rollback-amd64-installer.exe")
 
+	if _, err := os.Stat(filePath); err != nil {
+		return fmt.Errorf("installer not found: %v", err)
+	}
+
 	fmt.Println("Run installer:", filePath)
 
-	cmd := exec.Command("cmd", "/C", "start", "", filePath)
+	cmd := exec.Command(filePath)
+
 	err := cmd.Start()
 	if err != nil {
 		return err
@@ -438,3 +443,18 @@ func (a *App) InstallUpdate() error {
 	runtime.Quit(a.ctx)
 	return nil
 }
+
+// func (a *App) InstallUpdate() error {
+// 	filePath := filepath.Join(os.TempDir(), "hdh-rollback-amd64-installer.exe")
+
+// 	fmt.Println("Run installer:", filePath)
+
+// 	cmd := exec.Command("cmd", "/C", "start", "", filePath)
+// 	err := cmd.Start()
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	runtime.Quit(a.ctx)
+// 	return nil
+// }
