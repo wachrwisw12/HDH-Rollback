@@ -56,11 +56,11 @@ export default function LoginPage({ onLoginSuccess, onOpenSetup }: Props) {
       <Paper elevation={4} sx={{ p: 5, width: 380 }}>
         <Stack spacing={3}>
           <Typography variant="h5" fontWeight={600} textAlign="center">
-            HDH Rollback2
+            HDH Rollback
           </Typography>
 
           <Typography variant="body2" textAlign="center" color="text.secondary">
-            กรุณาเข้าสู่ระบบ
+            กรุณาเข้าสู่ระบบ ใช้ username ของหน่วยบริการ
           </Typography>
 
           {error && <Alert severity="error">{error}</Alert>}

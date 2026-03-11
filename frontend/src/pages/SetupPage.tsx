@@ -27,9 +27,9 @@ type Props = {
 
 export default function SetupPage({ onSetupSuccess }: Props) {
   const [form, setForm] = useState({
-    db_type: "postgres",
+    db_type: "mysql",
     host: "",
-    port: 5432,
+    port: 3306,
     database: "",
     username: "",
     password: "",
@@ -192,7 +192,7 @@ export default function SetupPage({ onSetupSuccess }: Props) {
             <TextField
               label="Port"
               name="port"
-              type="number"
+              type="text"
               value={form.port}
               onChange={handleChange}
               fullWidth
