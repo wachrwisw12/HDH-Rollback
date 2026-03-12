@@ -3,8 +3,6 @@
 import {domain} from '../models';
 import {config} from '../models';
 
-export function Activate(arg1:string):Promise<void>;
-
 export function BulkGetCID(arg1:Array<domain.CIDRequest>):Promise<Record<string, domain.PersonResult>>;
 
 export function CheckDatabaseConnection():Promise<boolean>;

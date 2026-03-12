@@ -33,7 +33,21 @@ type LoginResponse struct {
 	User   *User  `json:"user"`
 }
 
+//	type UpdateInfo struct {
+//		Version string `json:"version"`
+//		URL     string `json:"url"`
+//	}
 type UpdateInfo struct {
-	Version string `json:"version"`
-	URL     string `json:"url"`
+	Version string
+	URL     string
+	SHA256  string
+}
+type Release struct {
+	TagName string  `json:"tag_name"`
+	Assets  []Asset `json:"assets"`
+}
+
+type Asset struct {
+	Name               string `json:"name"`
+	BrowserDownloadURL string `json:"browser_download_url"`
 }

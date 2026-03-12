@@ -10,7 +10,7 @@ import LoginPage from "./pages/LoginPage";
 import MainLayout from "./layout/MainLayout";
 import { domain } from "../wailsjs/go/models";
 import { Box, CircularProgress } from "@mui/material";
-import RegisterPage from "./pages/RegisterPage";
+
 
 type AppState = "loading" | "setup" | "login" | "main" | "verify" | "about";
 
@@ -62,8 +62,7 @@ function App() {
             <CircularProgress />
           </Box>
         );
-      case "verify":
-        return <RegisterPage onSuccess={() => init()} />;
+    
 
       case "setup":
         return (

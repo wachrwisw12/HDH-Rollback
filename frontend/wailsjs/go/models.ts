@@ -102,8 +102,9 @@ export namespace domain {
 		}
 	}
 	export class UpdateInfo {
-	    version: string;
-	    url: string;
+	    Version: string;
+	    URL: string;
+	    SHA256: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new UpdateInfo(source);
@@ -111,8 +112,9 @@ export namespace domain {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.version = source["version"];
-	        this.url = source["url"];
+	        this.Version = source["Version"];
+	        this.URL = source["URL"];
+	        this.SHA256 = source["SHA256"];
 	    }
 	}
 

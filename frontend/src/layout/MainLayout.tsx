@@ -3,7 +3,6 @@ import { AppBar, Toolbar, Typography, Box, Button } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import ExcelConvertPage from "../pages/ExcelProcessPage";
-import { GetVersion } from "../../wailsjs/go/main/App";
 import Dashboard from "../pages/Dashboard";
 import AboutPage from "../pages/AboutPage";
 import { Info } from "@mui/icons-material";
@@ -18,11 +17,8 @@ type Props = {
 
 export default function MainLayout({ version, user, onLogout }: Props) {
   const [selected, setSelected] = useState("dashboard");
-  type UpdateInfo = {
-    version: string;
-    url: string;
-  };
-  const [update, setUpdate] = useState<UpdateInfo | null>(null);
+
+  const [update, setUpdate] = useState<domain.UpdateInfo | null>(null);
 
   const pages = [
     { key: "dashboard", label: "หน้าหลัก", icon: <HomeIcon /> },
@@ -30,25 +26,23 @@ export default function MainLayout({ version, user, onLogout }: Props) {
     { key: "excel", label: "ค้นหาข้อมูล", icon: <UploadFileIcon /> },
     { key: "about", label: "เกี่ยวกับโปรแกรม", icon: <Info /> },
   ];
-  useEffect(() => {
-    async function checkUpdate() {
-      const ver = await GetVersion();
+ useEffect(() => {
+  async function checkUpdate() {
+    if (!version || version === "dev") return;
 
-      if (ver === "dev") return; // 👈 dev ไม่ต้อง check update
+    try {
+      const result = await CheckUpdate(version);
 
-      try {
-        const result = await CheckUpdate(ver);
-
-        if (result) {
-          setUpdate(result);
-        }
-      } catch (err) {
-        console.error(err);
+      if (result) {
+        setUpdate(result);
       }
+    } catch (err) {
+      console.error("Check update error:", err);
     }
+  }
 
-    checkUpdate();
-  }, []);
+  checkUpdate();
+}, [version]);
 
   const renderContent = () => {
     switch (selected) {
@@ -147,7 +141,7 @@ export default function MainLayout({ version, user, onLogout }: Props) {
         <Toolbar />
         {renderContent()}
       </Box>
-      {update && <UpdateDialog version={update.version} url={update.url} />}
+   {update && <UpdateDialog version={update.Version} url={update.URL} />}
     </Box>
   );
 }

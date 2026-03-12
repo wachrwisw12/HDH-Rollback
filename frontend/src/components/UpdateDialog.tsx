@@ -23,10 +23,12 @@ export default function UpdateDialog({ version, url }: UpdateTag) {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = EventsOn("download-progress", (p: number) => {
-      setProgress(p);
+    const unsubscribe = EventsOn("update_progress", (p: number) => {
+      const percent = Math.min(100, Math.max(0, p));
 
-      if (p >= 100) {
+      setProgress(percent);
+
+      if (percent >= 100) {
         setDone(true);
         setDownloading(false);
       }
@@ -38,19 +40,22 @@ export default function UpdateDialog({ version, url }: UpdateTag) {
   }, []);
 
   const handleDownload = async () => {
+    if (downloading) return;
+
     setProgress(0);
     setDownloading(true);
+    setDone(false);
 
     try {
       await DownloadUpdate(url);
     } catch (err) {
-      console.error(err);
+      console.error("Download failed:", err);
       setDownloading(false);
     }
   };
 
   return (
-    <Dialog open>
+    <Dialog open maxWidth="xs" fullWidth>
       <DialogTitle>มีเวอร์ชันใหม่</DialogTitle>
 
       <DialogContent>
@@ -60,7 +65,9 @@ export default function UpdateDialog({ version, url }: UpdateTag) {
 
         {downloading && (
           <>
-            <Typography sx={{ mt: 2 }}>กำลังดาวน์โหลด {progress}%</Typography>
+            <Typography sx={{ mt: 2 }}>
+              กำลังดาวน์โหลด {progress}%
+            </Typography>
 
             <LinearProgress
               variant="determinate"
@@ -70,16 +77,16 @@ export default function UpdateDialog({ version, url }: UpdateTag) {
           </>
         )}
 
-        {done && <Typography sx={{ mt: 2 }}>ดาวน์โหลดสำเร็จ</Typography>}
+        {done && (
+          <Typography sx={{ mt: 2, color: "green" }}>
+            ดาวน์โหลดสำเร็จ พร้อมติดตั้ง
+          </Typography>
+        )}
       </DialogContent>
 
       <DialogActions>
         {!downloading && !done && (
-          <Button
-            variant="contained"
-            disabled={downloading}
-            onClick={handleDownload}
-          >
+          <Button variant="contained" onClick={handleDownload}>
             ดาวน์โหลดและติดตั้ง
           </Button>
         )}
