@@ -165,8 +165,9 @@ export default function SetupPage({ onSetupSuccess }: Props) {
               onChange={handleChange}
               fullWidth
             >
-              <MenuItem value="hosxp">HOSXP</MenuItem>
+              <MenuItem value="hosxp3">HOSXP v3</MenuItem>
               <MenuItem value="jhcis">JHCIS</MenuItem>
+              <MenuItem value="hosxp4">HOSXP v4</MenuItem>
             </TextField>
 
             <TextField
